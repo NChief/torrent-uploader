@@ -61,7 +61,7 @@ sub new {
 sub login {
 	my %self = @_;
 	
-	$self{mech}->default_header('Referer' => $self{url}."/login.pgp");
+	$self{mech}->default_header('Referer' => $self{url}."/login.php");
 	$self{mech}->post($self{url}."/takelogin.php", [ "username" => $self{username}, "password" => $self{password} ]);
 	
 	return 0 unless $self{mech}->success;
