@@ -3,6 +3,7 @@ package description;
 
 use strict;
 use warnings;
+use utf8;
 
 sub new {
 	my ($class, $param_rh ) = @_;
@@ -28,7 +29,10 @@ sub new {
 	} else {
 		$self{desc} = manual_create() if ($self{manual_create_possible});
 	}
-	die("Could not create description.") unless $self{desc};
+	die("Could not create description.") if (!$self{desc} and $self{manual_create_possible});
+	
+	# Fallback
+	$self{desc} = "NFO managler......." unless $self{desc};
 	return bless \%self, $class;
 }
 
@@ -40,7 +44,11 @@ sub strip_nfo {
 		$ut .= $_;
 	}
 	close($NFO);
-	return $ut;
+	$ut =~ s/[^a-z0-9\s\(\)\[\]\-_\.*:\/]//gi; # remove everything but..
+	$ut =~ s/^[\t\f ]+|[\t\f ]+$//mg; # trim each line
+	$ut =~ s/\n(?:\s*\n)+/\n/g; # remove blank lines
+	$ut =~ s/([a-vx-z])\1{2,}//gi; # remove repeating chars
+	return '[pre]'.$ut.'[/pre]';
 }
 
 sub manual_create {

@@ -9,9 +9,9 @@ use lib './lib';
 use fastresume;
 
 BEGIN {
-	use Exporter;
-	our @ISA = qw(Exporter);
-	our @EXPORT = qw(new upload download);
+	#use Exporter;
+	#our @ISA = qw(Exporter);
+	our @EXPORT = qw(new upload download test);
 }
 
 use WWW::Mechanize;
@@ -61,6 +61,7 @@ sub new {
 sub login {
 	my %self = @_;
 	
+	print "Logging in.\n" if $self{logging};
 	$self{mech}->default_header('Referer' => $self{url}."/login.php");
 	$self{mech}->post($self{url}."/takelogin.php", [ "username" => $self{username}, "password" => $self{password} ]);
 	
@@ -128,6 +129,12 @@ sub download {
 	print $TORRENT_FILE $tfile;
 	close($TORRENT_FILE);
 	return $uri;
+}
+
+sub test {
+	my ( $self, $arg ) = @_;
+	print "wut\n";
+	return $self->{url};
 }
 
 sub find_type {
