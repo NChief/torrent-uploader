@@ -37,7 +37,7 @@ sub get_banner {
 	my ( $self, $show ) = @_;
 	
 	die("You need an imgur key for this") unless $self->{imgur_key};
-	
+
 	$self->{mech}->get('http://www.thetvdb.com/api/GetSeries.php?seriesname='.rawurlencode($show).'&language=no');
 	if($self->{mech}->success) {
 		my $xml = new XML::Simple;

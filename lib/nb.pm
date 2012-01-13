@@ -125,7 +125,7 @@ sub download {
 	die("Could not download torrent") unless $self->{mech}->success;
 	open(my $TORRENT_FILE, ">", $self->{download_path}."/".$filename.".torrent") or die("Could not write .torrent to path");
 	my $tfile = $self->{mech}->content;
-	$tfile = fastresume($tfile) if $self->{fastresume};
+	$tfile = fastresume::fastresume($tfile, $file_path) if $self->{fastresume};
 	print $TORRENT_FILE $tfile;
 	close($TORRENT_FILE);
 	return $uri;

@@ -14,6 +14,7 @@ sub new {
 		mediafile => '',
 		imgur_key => '',
 		ss => 60,
+		dir => '.',
 	);
 	
 	# loop trough and set the properties to self.
@@ -25,21 +26,24 @@ sub new {
 	
 	die("info missing") unless ($self{mediafile} and $self{imgur_key});
 	
-	system('mplayer -ss '.$self{ss}.' -vo png:z=9 -ao null -frames 2 ' . $self{mediafile} . ' > /dev/null 2>&1') == 0 or die("unable to make screen of ".$self{mediafile});
+	#system('mplayer -ss '.$self{ss}.' -vo png:z=9:outdir="'.$self{dir}.'" -ao null -frames 2 " ' . $self{mediafile} . '"') == 0 or die("unable to make screen of ".$self{mediafile});
+	system('mplayer -ss '.$self{ss}.' -vo png:z=9:outdir="'.$self{dir}.'" -ao null -frames 2 "' . $self{mediafile} . '" > /dev/null 2>&1') == 0 or die("unable to make screen of ".$self{mediafile});
+	#print 'mplayer -ss '.$self{ss}.' -vo png:z=9:outdir="'.$self{dir}.'" -ao null -frames 2 "' . $self{mediafile} . '"'."\n";
+	#print 'mplayer -ss '.$self{ss}.' -vo png:z=9:outdir="'..'" -ao null -frames 2 "' . $self{mediafile} . '" > /dev/null 2>&1'."\n";
 	
 	my $imgur = new Image::Imgur(key => $self{imgur_key});
-	my $img = $imgur->upload("00000002.png");
+	my $img = $imgur->upload($self{dir}."00000002.png");
 	err("Upload to imgur failed with code: ".$img) if (isNumeric($img));
 	
 	my $t1 = new Image::Thumbnail(
 		size       => 300,
 		create     => 1,
-		input      => '00000002.png',
-		outputpath => 'thumb.png'
+		input      => $self{dir}.'00000002.png',
+		outputpath => $self{dir}.'thumb.png'
 	);
-	my $thumb = $imgur->upload("thumb.png");
-	err("Upload to imgur of thumb failed with code: ".$img) if (isNumeric($img));
-	unlink("00000001.png", "00000002.png", "thumb.png");
+	my $thumb = $imgur->upload($self{dir}."thumb.png");
+	err("Upload to imgur of thumb failed with code: ".$img, $self{dir}) if (isNumeric($img));
+	unlink($self{dir}."00000001.png", $self{dir}."00000002.png", $self{dir}."thumb.png");
 	
 	$self{screen} = $img;
 	$self{thumb} = $thumb;
@@ -57,8 +61,8 @@ sub isNumeric {
 }
 
 sub err {
-	my $err = shift;
-	unlink("00000001.png", "00000002.png", "thumb.png");
+	my ($err, $dir) = @_;
+	unlink($dir."00000001.png", $dir."00000002.png", $dir."thumb.png");
 	die($err);
 }
 
