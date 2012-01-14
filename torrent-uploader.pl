@@ -4,11 +4,13 @@
 use strict;
 use warnings;
 
+use FindBin '$Bin';
+
 # Only under development
 use Data::Dumper;
 
 # My libs
-use lib './lib';
+use lib $Bin.'/lib';
 use nb;
 use torrent;
 use description;
@@ -25,7 +27,10 @@ use File::Basename;
 
 # Handle config.
 my $config_file = "./torrent-uploader.cfg";
-$config_file = $ENV{"HOME"}."/torrent-uploader.cfg" if (-r $ENV{"HOME"}."/torrent-uploader.pl");
+$config_file = $ENV{"HOME"}."/torrent-uploader.cfg" if (-r $ENV{"HOME"}."/torrent-uploader.cfg");
+
+print $config_file."\n";
+print $ENV{"HOME"}."\n";
 
 #print $config_file."\n";
 my $cfg = new Config::Simple();
@@ -58,7 +63,7 @@ sub init {
 		$no_unrar = 1;
 		makescreens() if ($make_screens and $input =~ /.*\.(avi|mkv|mp4)$/);
 		if(-r $nfo_file) {
-			print "Stripping nfo." unless $silent;
+			print "Stripping nfof." unless $silent;
 			my $description = description->new( {
 				nfo_file => $nfo_file,
 			} );
@@ -87,7 +92,7 @@ sub init {
 			my $series = $1;
 			$series =~ s/\./ /g;
 			$glob_vars{'image'} = $graphic->get_banner($series);
-		} elsif($cfg->('tmdb_key') and $glob_vars{'desc'} =~ /(tt\d{7})/) { # Movie and got imdb ID
+		} elsif($cfg->param('tmdb_key') and $glob_vars{'desc'} =~ /(tt\d{7})/) { # Movie and got imdb ID
 			$glob_vars{'image'} = $graphic->get_poster($1);
 		}
 	}
@@ -135,7 +140,6 @@ sub init {
 	die("Unable to detect type, try -t|--type") unless $type;
 
 	#Upload
-	exit 0;
 	#my $upload = "https://norbits.net/details.php?id=68928";
 	my $upload = $nb->upload(toutf8($release), $torrent_file, toutf8($glob_vars{'desc'}), $type, $nfo_file, $scene);
 	die("Opplasting mislykktes") unless $upload;
@@ -153,17 +157,17 @@ sub files_do {
 		makescreens($File::Find::name);
 	}
 	if(!$nfo_file and $infile =~ /.*\.nfo/) {
-		print "Stripping nfo.\n" unless $silent;
+		print "Stripping nfos.\n" unless $silent;
 		my $description = description->new( {
 			nfo_file => $File::Find::name,
 		} );
 		$glob_vars{'desc'} = $description->{'desc'};
 		$nfo_file = $File::Find::name;
 	}
-	if($infile =~ /.*\.part1\.rar$/ and $cfg->param('unrar')) {
+	if($infile =~ /.*\.part0*1\.rar$/ and !$no_unrar) {
 		print "Unraring files\n" unless $silent;
 		system($cfg->param('unrar')." x -inul -y '".$File::Find::name."'") == 0 or die("Unable to unrar ".$File::Find::name);
-	} elsif ($infile !~ /.*\.part\d+\.rar$/ and $infile =~ /.*\.rar$/ and $cfg->param('unrar')) {
+	} elsif ($infile !~ /.*\.part\d+\.rar$/ and $infile =~ /.*\.rar$/ and !$no_unrar) {
 		print "Unraring file\n" unless $silent;
 		system($cfg->param('unrar')." x -inul -y '".$File::Find::name."'") == 0 or die("Unable to unrar ".$File::Find::name);
 	}
