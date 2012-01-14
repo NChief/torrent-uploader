@@ -36,13 +36,13 @@ $make_screens = 1 if($cfg->param('make_screens') eq "yes");
 GetOptions ('no-rar' => \$no_unrar, 'torrent-file=s' => \$torrent_file,'q|silent' => \$silent,'s|scene' => \$scene, 't|type=s' => \$type, 'work-dir=s' => \$work_dir, 'torrent-dir=s' => \$torrent_dir, 'no-screens' => \$no_screens, 'nfo=s' => \$nfo_file) or die("Wrong input");
 
 $make_screens = 0 if $no_screens;
-$make_screens = 0 unless $cfg->param('imgur_key')
+$make_screens = 0 unless $cfg->param('imgur_key');
 $work_dir = $cfg->param('work_dir') unless $work_dir;
 $torrent_dir = $cfg->param('torrent_dir') unless $torrent_dir;
 
 my %glob_vars = ();
 
-init(abs_path($ARGV[0]));
+#init(abs_path($ARGV[0]));
 #print Dumper(\%glob_vars);
 #print $glob_vars{screens}[0];
 
