@@ -42,7 +42,7 @@ $torrent_dir = $cfg->param('torrent_dir') unless $torrent_dir;
 
 my %glob_vars = ();
 
-#init(abs_path($ARGV[0]));
+init(abs_path($ARGV[0]));
 #print Dumper(\%glob_vars);
 #print $glob_vars{screens}[0];
 
