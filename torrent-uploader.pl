@@ -176,6 +176,7 @@ sub files_do {
 		system($cfg->param('unrar')." x -inul -y '".$File::Find::name."'") == 0 or die("Unable to unrar ".$File::Find::name);
 		find (\&files_do, $input);
 	}
+	$scene = 1 if $infile =~ /.*\.rar$/;
 }
 
 sub makescreens {
