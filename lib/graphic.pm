@@ -41,7 +41,9 @@ sub get_banner {
 	$self->{mech}->get('http://www.thetvdb.com/api/GetSeries.php?seriesname='.rawurlencode($show).'&language=no');
 	if($self->{mech}->success) {
 		my $xml = new XML::Simple;
-		my $data = $xml->XMLin(toutf8($self->{mech}->content), ForceArray => 1);
+		my $content = $self->{mech}->content;
+		$content =~ s/[^\x00-\x7f]//g;
+		my $data = $xml->XMLin($content, ForceArray => 1);
 		#return $data;
 		if($data->{'Series'}[0]->{'banner'}[0]) {
 			my $tvdburl = 'http://thetvdb.com/banners/'.$data->{'Series'}[0]->{'banner'}[0];
@@ -83,11 +85,6 @@ sub isNumeric {
 	} else {
 		return 0;
 	}
-}
-
-sub toutf8 {
-	my $text = shift;
-	return Encode::encode("utf8", Encode::decode("iso-8859-1", $text));
 }
 
 1;

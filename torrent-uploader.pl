@@ -147,7 +147,7 @@ sub init {
 	$input =~ s/\Q$basename\E//;
 	my $uri = $nb->download($upload, $input);
 	die("Error downloading torrent ".$upload) unless $uri;
-	print "DONE: ".$uri."\n" if $silent;
+	print "DONE: ".$uri."\n" unless $silent;
 }
 
 sub files_do {
