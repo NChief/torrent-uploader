@@ -44,8 +44,10 @@ $make_screens = 0 if $no_screens;
 $make_screens = 0 unless $cfg->param('imgur_key');
 $work_dir = $cfg->param('work_dir') unless $work_dir;
 $torrent_dir = $cfg->param('torrent_dir') unless $torrent_dir;
+$no_unrar = 1 if $torrent_file;
 
 my %glob_vars = ();
+my @checked_filed;
 
 init(abs_path($ARGV[0]));
 #print Dumper(\%glob_vars);
@@ -153,6 +155,9 @@ sub init {
 
 sub files_do {
 	my $infile = $_;
+	my $fullpath = $File::Find::name;
+	return if (grep(/\Q$fullpath\E/, @checked_files));
+	push(@checked_files, $File::Find::name);
 	if($make_screens and $infile =~ /.*\.(avi|mkv|mp4)$/) { # Make screens
 		makescreens($File::Find::name);
 	}
@@ -167,9 +172,11 @@ sub files_do {
 	if($infile =~ /.*\.part0*1\.rar$/ and !$no_unrar) {
 		print "Unraring files\n" unless $silent;
 		system($cfg->param('unrar')." x -inul -y '".$File::Find::name."'") == 0 or die("Unable to unrar ".$File::Find::name);
+		find (\&files_do, $File::find::dir);
 	} elsif ($infile !~ /.*\.part\d+\.rar$/ and $infile =~ /.*\.rar$/ and !$no_unrar) {
 		print "Unraring file\n" unless $silent;
 		system($cfg->param('unrar')." x -inul -y '".$File::Find::name."'") == 0 or die("Unable to unrar ".$File::Find::name);
+		find (\&files_do, $File::find::dir);
 	}
 }
 
