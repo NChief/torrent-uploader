@@ -45,13 +45,14 @@ $no_unrar = 1 if $torrent_file;
 
 my %glob_vars = ();
 my @checked_files;
+my $input;
 
 init(abs_path($ARGV[0]));
 #print Dumper(\%glob_vars);
 #print $glob_vars{screens}[0];
 
 sub init {
-	my $input = shift;
+	$input = shift;
 	my $basename = basename($input);
 	my $release;
 	if (-d $input) { #is a directory
@@ -169,16 +170,17 @@ sub files_do {
 	if($infile =~ /.*\.part0*1\.rar$/ and !$no_unrar) {
 		print "Unraring files\n" unless $silent;
 		system($cfg->param('unrar')." x -inul -y '".$File::Find::name."'") == 0 or die("Unable to unrar ".$File::Find::name);
-		find (\&files_do, $File::find::dir);
+		find (\&files_do, $input);
 	} elsif ($infile !~ /.*\.part\d+\.rar$/ and $infile =~ /.*\.rar$/ and !$no_unrar) {
 		print "Unraring file\n" unless $silent;
 		system($cfg->param('unrar')." x -inul -y '".$File::Find::name."'") == 0 or die("Unable to unrar ".$File::Find::name);
-		find (\&files_do, $File::find::dir);
+		find (\&files_do, $input);
 	}
 }
 
 sub makescreens {
 	my $mediafile = shift;
+	return if $mediafile =~ /sample/;
 	print "Making screens..\n" unless $silent;
 	for(my $i = 1; $i <= 2; $i++) {
 		my $s = 60 * $i;
