@@ -87,7 +87,7 @@ sub isNumeric {
 
 sub toutf8 {
 	my $text = shift;
-	return Encode::encode("iso-8859-1", Encode::decode("utf8", $text));
+	return Encode::encode("utf8", Encode::decode("iso-8859-1", $text));
 }
 
 1;
