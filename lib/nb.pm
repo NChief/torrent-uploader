@@ -72,6 +72,7 @@ sub login {
 
 sub upload {
 	my ( $self, $release_name, $torrent_path, $description, $type, $nfo_path, $scene ) = @_;
+	if ($scene) { $scene = "yes"; } else { $scene = "no"; }
 	print "Uploading torrent.\n" if $self->{logging};
 	die("input missing") unless ($release_name and $torrent_path and $description and $type);
 	$self->{mech}->get($self->{url}."/upload.php");
@@ -113,7 +114,7 @@ sub upload {
 
 sub download {
 	my ( $self, $uri, $file_path ) = @_;
-	print "Downloading torrent." if $self->{logging};
+	print "Downloading torrent.\n" if $self->{logging};
 	$self->{mech}->get($uri);
 	my $filename = "undef.torrent";
 	if ($self->{mech}->content =~ /download\.php\/\d+\/(.+)\.torrent"/) {
