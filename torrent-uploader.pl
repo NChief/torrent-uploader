@@ -29,9 +29,6 @@ use File::Basename;
 my $config_file = "./torrent-uploader.cfg";
 $config_file = $ENV{"HOME"}."/torrent-uploader.cfg" if (-r $ENV{"HOME"}."/torrent-uploader.cfg");
 
-print $config_file."\n";
-print $ENV{"HOME"}."\n";
-
 #print $config_file."\n";
 my $cfg = new Config::Simple();
 $cfg->read($config_file) or die "CONFIG ERROR: ".$cfg->error();
@@ -47,7 +44,7 @@ $torrent_dir = $cfg->param('torrent_dir') unless $torrent_dir;
 $no_unrar = 1 if $torrent_file;
 
 my %glob_vars = ();
-my @checked_filed;
+my @checked_files;
 
 init(abs_path($ARGV[0]));
 #print Dumper(\%glob_vars);
