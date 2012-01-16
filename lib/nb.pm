@@ -150,7 +150,7 @@ sub find_type {
 		if ($release =~ m/MP4/i) { return "26" }
 		if ($release =~ m/MPEG/i) { return "24" }
 		if ($release =~ m/(BluRay|Blu-Ray)/i) { return "19" }
-		if ($release =~ m/DVDR/i) {return "20" }
+		if ($release =~ m/DVD/i) {return "20" }
 	}
 	return $fallback if $fallback;
 	return 0;
