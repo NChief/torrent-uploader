@@ -33,7 +33,7 @@ sub new {
 		if ($self{no_unrar}) {
 			system('buildtorrent -q -p1 -L '.$self{piece_length}.' -a '.$self{announce_url}.' "'.$self{file}.'" "'.$self{save_path}.'/'.$filename.'.torrent"') == 0 or die("Creating torrent failed!");
 		 } else {
-			my $filelist = create_filelist($self{save_path}."/filelist.txt", $self{file});
+			my $filelist = create_filelist($self{save_path}."/".$filename."-filelist.txt", $self{file});
 			system('buildtorrent -q -p1 -L '.$self{piece_length}.' -a '.$self{announce_url}.' -f "'.$filelist.'" -n "'.$filename.'" "'.$self{save_path}.'/'.$filename.'.torrent"') == 0 or die("Creating torrent failed!");
 			$self{torrent_file} = $self{save_path}.'/'.$filename.'.torrent';
 			unlink($self{save_path}."/filelist.txt")
@@ -47,25 +47,26 @@ sub new {
 sub create_filelist {
 	my ($filelist, $path) = @_;
 	open( my $FILE, ">", $filelist ) or die($!);
-	opendir( my $DIR, $path ) or die($!);
-	while (my $filename = readdir($DIR)) {
-		unless ($filename =~ /(^\.|\.rar$|\.r\d\d$|\.sfv$)/) {
-			my $syspath = abs_path($path."/".$filename);
-			my $torpath = $filename;
-			if (-d $syspath) {
-				opendir(my $DIR2, $syspath) or die($!);
-				while (my $filename2 = readdir($DIR2)) {
-					print $FILE $syspath."/".$filename2."|".$torpath."/".$filename2."\n" unless($filename2 =~ /^\./);
-				}
-				closedir($DIR2);
-			} else {
-				print $FILE $syspath.'|'.$torpath."\n";
-			}
+	print $FILE filelist($path);
+	close($FILE);
+	print $filelist;
+}
+
+sub filelist {
+	my ($path, $prepath) = @_;
+	my $file = "";
+	opendir(my $DIR, $path) or die($!);
+	while(my $filename = readdir($DIR)) {
+		next if $filename =~ /(^\.|\.rar$|\.r\d\d$|\.sfv$)/;
+		my $syspath = abs_path($path."/".$filename);
+		my $torpath = ($prepath ? $prepath."/" : "").$filename;
+		if (-d $syspath) {
+			$file .= filelist($syspath, $torpath);
+		} else {
+			$file .= $syspath.'|'.$torpath."\n";
 		}
 	}
-	closedir($DIR);
-	close($FILE);
-	return $filelist;
+	return $file;
 }
 
 1;
