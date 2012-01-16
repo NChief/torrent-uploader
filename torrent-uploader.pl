@@ -47,7 +47,13 @@ my %glob_vars = ();
 my @checked_files;
 my $input;
 
-init(abs_path($ARGV[0]));
+eval {init(abs_path($ARGV[0])); };
+my $error = $@ if $@;
+if ($error) {
+	open(my $ERR, ">>", "~/.tu-err.log") or die($!);
+	print $ERR "ERROR: ".$@."\n";
+	close($ERR);
+}
 #print Dumper(\%glob_vars);
 #print $glob_vars{screens}[0];
 
