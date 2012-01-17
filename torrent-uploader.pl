@@ -33,9 +33,9 @@ $config_file = $ENV{"HOME"}."/torrent-uploader.cfg" if (-r $ENV{"HOME"}."/torren
 my $cfg = new Config::Simple();
 $cfg->read($config_file) or die "CONFIG ERROR: ".$cfg->error();
 
-my($scene, $type, $make_screens, $nfo_file, $silent, $torrent_file, $work_dir, $torrent_dir, $no_unrar, $no_screens);
+my($scene, $type, $make_screens, $nfo_file, $silent, $torrent_file, $work_dir, $torrent_dir, $no_unrar, $no_screens, $type_fallback);
 $make_screens = 1 if($cfg->param('make_screens') eq "yes");
-GetOptions ('no-rar' => \$no_unrar, 'torrent-file=s' => \$torrent_file,'q|silent' => \$silent,'s|scene' => \$scene, 't|type=s' => \$type, 'work-dir=s' => \$work_dir, 'torrent-dir=s' => \$torrent_dir, 'no-screens' => \$no_screens, 'nfo=s' => \$nfo_file) or die("Wrong input");
+GetOptions ('f|type-fallback' => \$type_fallback, 'no-rar' => \$no_unrar, 'torrent-file=s' => \$torrent_file,'q|silent' => \$silent,'s|scene' => \$scene, 't|type=s' => \$type, 'work-dir=s' => \$work_dir, 'torrent-dir=s' => \$torrent_dir, 'no-screens' => \$no_screens, 'nfo=s' => \$nfo_file) or die("Wrong input");
 
 $make_screens = 0 if $no_screens;
 $make_screens = 0 unless $cfg->param('imgur_key');
@@ -142,7 +142,7 @@ sub init {
 		logging => $logging,
 	} );
 	#find type
-	$type = $nb->find_type($basename) unless $type;
+	$type = $nb->find_type($basename, $type_fallback) unless $type;
 	die("Unable to detect type, try -t|--type") unless $type;
 
 	#Upload
