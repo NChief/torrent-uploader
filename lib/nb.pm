@@ -75,6 +75,8 @@ sub upload {
 	if ($scene) { $scene = "yes"; } else { $scene = "no"; }
 	print "Uploading torrent.\n" if $self->{logging};
 	die("input missing") unless ($release_name and $torrent_path and $description and $type);
+	$release_name =~ s/nedlasting\.net//gi;
+	$description =~ s/nedlasting\.net//gi;
 	$self->{mech}->get($self->{url}."/upload.php");
 	die("Could not reach ".$self->{url}."/upload.php") unless ($self->{mech}->success);
 	$self->{mech}->add_header('Accept-Charset' => 'iso-8859-1');
