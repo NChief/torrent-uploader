@@ -35,7 +35,7 @@ $cfg->read($config_file) or die "CONFIG ERROR: ".$cfg->error();
 
 my($scene, $type, $make_screens, $nfo_file, $silent, $torrent_file, $work_dir, $torrent_dir, $no_unrar, $no_screens, $type_fallback);
 $make_screens = 1 if($cfg->param('make_screens') eq "yes");
-GetOptions ('f|type-fallback' => \$type_fallback, 'no-rar' => \$no_unrar, 'torrent-file=s' => \$torrent_file,'q|silent' => \$silent,'s|scene' => \$scene, 't|type=s' => \$type, 'work-dir=s' => \$work_dir, 'torrent-dir=s' => \$torrent_dir, 'no-screens' => \$no_screens, 'nfo=s' => \$nfo_file) or die("Wrong input");
+GetOptions ('f|type-fallback=s' => \$type_fallback, 'no-rar' => \$no_unrar, 'torrent-file=s' => \$torrent_file,'q|silent' => \$silent,'s|scene' => \$scene, 't|type=s' => \$type, 'work-dir=s' => \$work_dir, 'torrent-dir=s' => \$torrent_dir, 'no-screens' => \$no_screens, 'nfo=s' => \$nfo_file) or die("Wrong input");
 
 $make_screens = 0 if $no_screens;
 $make_screens = 0 unless $cfg->param('imgur_key');
@@ -50,7 +50,8 @@ my $input;
 eval {init(abs_path($ARGV[0])); };
 my $error = $@ if $@;
 if ($error) {
-	open(my $ERR, ">>", "~/.tu-err.log") or die($!);
+	print $error."\n" unless $silent;
+	open(my $ERR, ">>", $ENV{"HOME"}."/.tu-err.log") or die($!);
 	print $ERR "ERROR: ".$@."\n";
 	close($ERR);
 }

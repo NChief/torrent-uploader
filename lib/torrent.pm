@@ -49,7 +49,7 @@ sub create_filelist {
 	open( my $FILE, ">", $filelist ) or die($!);
 	print $FILE filelist($path);
 	close($FILE);
-	print $filelist;
+	return $filelist;
 }
 
 sub filelist {
