@@ -41,6 +41,8 @@ $make_screens = 0 if $no_screens;
 $make_screens = 0 unless $cfg->param('imgur_key');
 $work_dir = $cfg->param('work_dir') unless $work_dir;
 $torrent_dir = $cfg->param('torrent_dir') unless $torrent_dir;
+my $mancreate = 1;
+$mancreate = 0 if $silent;
 #$no_unrar = 1 if $torrent_file;
 
 my %glob_vars = ();
@@ -73,6 +75,7 @@ sub init {
 			print "Stripping nfof." unless $silent;
 			my $description = description->new( {
 				nfo_file => $nfo_file,
+				manual_create_possible => $mancreate,
 			} );
 			$glob_vars{'desc'} = $description->{'desc'};
 		}
@@ -84,7 +87,7 @@ sub init {
 		return 0;
 	}
 	unless ($glob_vars{'desc'}) {
-		my $description = description->new({nfo_file => $nfo_file});
+		my $description = description->new({nfo_file => $nfo_file, manual_create_possible => $mancreate});
 		$glob_vars{'desc'} = $description->{'desc'};
 	}
 
@@ -174,6 +177,7 @@ sub files_do {
 		print "Stripping nfos.\n" unless $silent;
 		my $description = description->new( {
 			nfo_file => $File::Find::name,
+			manual_create_possible => $mancreate,
 		} );
 		$glob_vars{'desc'} = $description->{'desc'};
 		$nfo_file = $File::Find::name;
