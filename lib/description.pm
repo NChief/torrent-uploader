@@ -44,7 +44,7 @@ sub strip_nfo {
 		$ut .= $_;
 	}
 	close($NFO);
-	$ut =~ s/[^a-zæøåÆØÅ0-9\s\(\)\[\]\-_\.*:\/]//gi; # remove everything but..
+	$ut =~ s/[^a-z0-9\s\(\)\[\]\-_\.*:\/]//gi; # remove everything but..
 	$ut =~ s/^[\t\f ]+|[\t\f ]+$//mg; # trim each line
 	$ut =~ s/\n(?:\s*\n)+/\n/g; # remove blank lines
 	$ut =~ s/([a-vx-z])\1{2,}//gi; # remove repeating chars

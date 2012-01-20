@@ -26,14 +26,18 @@ sub new {
 	
 	die("info missing") unless ($self{mediafile} and $self{imgur_key});
 	
-	#system('mplayer -ss '.$self{ss}.' -vo png:z=9:outdir="'.$self{dir}.'" -ao null -frames 2 " ' . $self{mediafile} . '"') == 0 or die("unable to make screen of ".$self{mediafile});
+	#print 'mplayer -ss '.$self{ss}.' -vo png:z=9:outdir="'.$self{dir}.'" -ao null -frames 2 "' . $self{mediafile} . '" > /dev/null 2>&1';
 	system('mplayer -ss '.$self{ss}.' -vo png:z=9:outdir="'.$self{dir}.'" -ao null -frames 2 "' . $self{mediafile} . '" > /dev/null 2>&1') == 0 or die("unable to make screen of ".$self{mediafile});
-	#print 'mplayer -ss '.$self{ss}.' -vo png:z=9:outdir="'.$self{dir}.'" -ao null -frames 2 "' . $self{mediafile} . '"'."\n";
-	#print 'mplayer -ss '.$self{ss}.' -vo png:z=9:outdir="'..'" -ao null -frames 2 "' . $self{mediafile} . '" > /dev/null 2>&1'."\n";
+	
+	
 	
 	my $imgur = new Image::Imgur(key => $self{imgur_key});
 	my $img = $imgur->upload($self{dir}."00000002.png");
-	err("Upload to imgur failed with code: ".$img) if (isNumeric($img));
+	if (isNumeric($img)) {
+		err("Upload to imgur failed with code: ".$img, $self{dir});
+		return bless \%self, $class;
+	}
+	#err("Upload to imgur failed with code: ".$img) if (isNumeric($img));
 	
 	my $t1 = new Image::Thumbnail(
 		size       => 300,
@@ -42,7 +46,11 @@ sub new {
 		outputpath => $self{dir}.'thumb.png'
 	);
 	my $thumb = $imgur->upload($self{dir}."thumb.png");
-	err("Upload to imgur of thumb failed with code: ".$img, $self{dir}) if (isNumeric($img));
+	if (isNumeric($img)) {
+		err("Upload to imgur of thumb failed with code: ".$img, $self{dir});
+		return bless \%self, $class;
+	}
+	#err("Upload to imgur of thumb failed with code: ".$img, $self{dir}) if (isNumeric($img));
 	unlink($self{dir}."00000001.png", $self{dir}."00000002.png", $self{dir}."thumb.png");
 	
 	$self{screen} = $img;
@@ -63,7 +71,7 @@ sub isNumeric {
 sub err {
 	my ($err, $dir) = @_;
 	unlink($dir."00000001.png", $dir."00000002.png", $dir."thumb.png");
-	die($err);
+	print $err."\n";
 }
 
 1;
