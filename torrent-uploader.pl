@@ -41,7 +41,7 @@ $make_screens = 0 if $no_screens;
 $make_screens = 0 unless $cfg->param('imgur_key');
 $work_dir = $cfg->param('work_dir') unless $work_dir;
 $torrent_dir = $cfg->param('torrent_dir') unless $torrent_dir;
-$no_unrar = 1 if $torrent_file;
+#$no_unrar = 1 if $torrent_file;
 
 my %glob_vars = ();
 my @checked_files;
@@ -105,7 +105,11 @@ sub init {
 	}
 	
 	# Create torrent
-	unless ($torrent_file) {
+	#my $create_torrent = 1;
+	#$create_torrent = 0 if $torrent_file;
+	#$create_torrent = 1 if $glob_vars{'unrar_done'};
+	#if ($create_torrent) {
+	if ($glob_vars{'unrar_done'} or (!$torrent_file and !$glob_vars{'unrar_done'})) {
 		print "Creating torrent..\n" unless $silent;
 		my $torrent = torrent->new( {
 			announce_url => 'http://jalla.com',
@@ -177,10 +181,12 @@ sub files_do {
 	if($infile =~ /.*\.part0*1\.rar$/ and !$no_unrar) {
 		print "Unraring files\n" unless $silent;
 		system($cfg->param('unrar')." x -inul -y '".$File::Find::name."'") == 0 or die("Unable to unrar ".$File::Find::name);
+		$glob_vars{'unrar_done'} = 1;
 		find (\&files_do, $input);
 	} elsif ($infile !~ /.*\.part\d+\.rar$/ and $infile =~ /.*\.rar$/ and !$no_unrar) {
 		print "Unraring file\n" unless $silent;
 		system($cfg->param('unrar')." x -inul -y '".$File::Find::name."'") == 0 or die("Unable to unrar ".$File::Find::name);
+		$glob_vars{'unrar_done'} = 1;
 		find (\&files_do, $input);
 	}
 	$scene = 1 if $infile =~ /.*\.rar$/;
