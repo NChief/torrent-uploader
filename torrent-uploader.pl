@@ -163,7 +163,7 @@ sub files_do {
 	my $fullpath = $File::Find::name;
 	return if (grep(/\Q$fullpath\E/, @checked_files));
 	push(@checked_files, $File::Find::name);
-	if($make_screens and $infile =~ /.*\.(avi|mkv|mp4)$/) { # Make screens
+	if($make_screens and $infile =~ /.*\.(avi|mkv|mp4|wmv)$/) { # Make screens
 		makescreens($File::Find::name);
 	}
 	if(!$nfo_file and $infile =~ /.*\.nfo/) {
