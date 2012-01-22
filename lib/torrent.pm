@@ -14,7 +14,7 @@ sub new {
 		announce_url => '',
 		file => '',
 		save_path => '.',
-		piece_length => 41941304,
+		piece_length => 4194304,
 		buildtorrent => 1,
 		no_unrar => 0,
 	);
