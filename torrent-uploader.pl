@@ -24,6 +24,7 @@ use Config::Simple;
 use File::Find;
 use Cwd 'abs_path';
 use File::Basename;
+use DateTime;
 
 my($scene, $type, $make_screens, $nfo_file, $silent, $torrent_file, $work_dir, $torrent_dir, $no_unrar, $no_screens, $type_fallback, $tmp_config);
 GetOptions ('c|config-file=s' => \$tmp_config, 'f|type-fallback=s' => \$type_fallback, 'no-unrar' => \$no_unrar, 'torrent-file=s' => \$torrent_file,'q|silent' => \$silent,'s|scene' => \$scene, 't|type=s' => \$type, 'work-dir=s' => \$work_dir, 'torrent-dir=s' => \$torrent_dir, 'no-screens' => \$no_screens, 'nfo=s' => \$nfo_file) or die("Wrong input");
@@ -52,9 +53,12 @@ my $input;
 eval {init(abs_path($ARGV[0])); };
 my $error = $@ if $@;
 if ($error) {
+  my $dt = DateTime->now;
+  my $date = $dt->ymd;
+  my $time = $dt->hms;
 	print $error."\n" unless $silent;
 	open(my $ERR, ">>", $ENV{"HOME"}."/.tu-err.log") or die($!);
-	print $ERR "ERROR: ".$@."\n";
+	print $ERR $date." ".$time." ERROR: ".$@."\n";
 	close($ERR);
 }
 #print Dumper(\%glob_vars);
@@ -64,13 +68,14 @@ sub init {
 	$input = shift;
 	my $basename = basename($input);
 	my $release = $basename;
+	my $extension;
 	if (-d $input) { #is a directory
 		#$release = $basename;
 		# do needed operation on files!
 		find (\&files_do, $input);
 	} elsif (-r $input) { # is a readable file
 		$no_unrar = 1;
-		makescreens() if ($make_screens and $input =~ /.*\.(avi|mkv|mp4)$/);
+		makescreens($input) if ($make_screens and $input =~ /.*\.(avi|mkv|mp4)$/);
 		if($nfo_file and -r $nfo_file) {
 			print "Stripping nfof." unless $silent;
 			my $description = description->new( {
@@ -80,11 +85,26 @@ sub init {
 			$glob_vars{'desc'} = $description->{'desc'};
 		}
 		$release =~ m/.*(\..*)$/;
-		my $extension = $1;
+		$extension = $1;
 	    $release =~ s/$extension//;
 	} else { # Not a file, or its not readable!
 		print STDERR $input." is not a file, or its not readable!";
 		return 0;
+	}
+	unless ($glob_vars{'desc'}) {
+		if (-r $work_dir."/nfos/".$release.".nfo") {
+			my $description = description->new( {
+				nfo_file => $work_dir."/nfos/".$release.".nfo",
+				manual_create_possible => $mancreate,
+			} );
+			$glob_vars{'desc'} = $description->{'desc'};
+		} elsif (-r $work_dir."/nfos/".$release.$extension.".nfo") {
+			my $description = description->new( {
+				nfo_file => $work_dir."/nfos/".$release.$extension.".nfo",
+				manual_create_possible => $mancreate,
+			} );
+			$glob_vars{'desc'} = $description->{'desc'};
+		}
 	}
 	unless ($glob_vars{'desc'}) {
 		my $description = description->new({nfo_file => $nfo_file, manual_create_possible => $mancreate});
