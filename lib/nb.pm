@@ -77,8 +77,8 @@ sub upload {
 	die("input missing") unless ($release_name and $torrent_path and $description and $type);
 	$release_name =~ s/nedlasting\.net//gi;
 	$description =~ s/nedlasting\.net//gi;
-	$self->{mech}->get($self->{url}."/upload.php");
-	die("Could not reach ".$self->{url}."/upload.php") unless ($self->{mech}->success);
+	$self->{mech}->get($self->{url}."/uploadbeta.php");
+	die("Could not reach ".$self->{url}."/uploadbeta.php") unless ($self->{mech}->success);
 	$self->{mech}->add_header('Accept-Charset' => 'iso-8859-1');
 	my $form = $self->{mech}->form_name( "upload" );
 	$form->accept_charset("iso-8859-1");
