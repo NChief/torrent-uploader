@@ -7,6 +7,7 @@ use warnings;
 use FindBin '$Bin';
 
 # Only under development
+# testedit
 use Data::Dumper;
 
 # My libs
@@ -58,7 +59,7 @@ if ($error) {
   my $time = $dt->hms;
 	print $error."\n" unless $silent;
 	open(my $ERR, ">>", $ENV{"HOME"}."/.tu-err.log") or die($!);
-	print $ERR $date." ".$time." ERROR: ".$@."\n";
+	print $ERR $date." ".$time." ERROR: ".$error."\n";
 	close($ERR);
 }
 #print Dumper(\%glob_vars);
@@ -76,7 +77,7 @@ sub init {
 	} elsif (-r $input) { # is a readable file
 		$no_unrar = 1;
 		makescreens($input) if ($make_screens and $input =~ /.*\.(avi|mkv|mp4)$/);
-		if($nfo_file and -r $nfo_file) {
+		if(($nfo_file and -r $nfo_file) and !(-r $work_dir."/nfos/".$release.".nfo")) {
 			print "Stripping nfof." unless $silent;
 			my $description = description->new( {
 				nfo_file => $nfo_file,
