@@ -173,10 +173,14 @@ sub init {
 	#find type
 	$type = $nb->find_type($basename, $type_fallback) unless $type;
 	die("Unable to detect type, try -t|--type") unless $type;
+  
+  #Find new cats
+  my %cats = $nb->find_categories($basename);
+  die("Unable to detect categories") unless $cats{'main'};
 
 	#Upload
 	#my $upload = "https://norbits.net/details.php?id=68928";
-	my $upload = $nb->upload(toutf8($release), $torrent_file, toutf8($glob_vars{'desc'}), $type, $nfo_file, $scene);
+	my $upload = $nb->upload(toutf8($release), $torrent_file, toutf8($glob_vars{'desc'}), $type, $nfo_file, $scene, %cats);
 	die("Opplasting mislykktes") unless $upload;
 	
 	# Download

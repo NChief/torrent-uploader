@@ -11,7 +11,8 @@ sub fastresume {
 	$t = bdecode($t);
 
 	unless (ref $t eq "HASH" and exists $t->{info}) {
-		die "No info key.\n";
+		#die "No info key.\n";
+    return;
 	}
 	
 	my $psize;

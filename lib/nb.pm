@@ -71,7 +71,7 @@ sub login {
 }
 
 sub upload {
-	my ( $self, $release_name, $torrent_path, $description, $type, $nfo_path, $scene ) = @_;
+	my ( $self, $release_name, $torrent_path, $description, $type, $nfo_path, $scene, %cats) = @_;
 	if ($scene) { $scene = "yes"; } else { $scene = "no"; }
 	print "Uploading torrent.\n" if $self->{logging};
 	die("input missing") unless ($release_name and $torrent_path and $description and $type);
@@ -87,13 +87,17 @@ sub upload {
 		fields => {
 			MAX_FILE_SIZE => "3000000",
 			file => $torrent_path,
-			filetype => "2",
+			#filetype => "2",
 			name => $release_name,
 			nfo => $nfo_path,
 			scenerelease => $scene,
 			descr => $description,
 			type => $type,
-			anonym => "yes"
+      main_cat => $cats{'main'},
+      sub1_cat => $cats{'sub1'},
+      sub2_cat => $cats{'sub2'},
+      sub3_cat => $cats{'sub3'}
+			#anonym => "yes"
 		}
 	);
 	die("Could not reach ".$self->{url}."/takeupload.php") unless ($self->{mech}->success);
@@ -101,6 +105,11 @@ sub upload {
 	my $uri = $self->{mech}->uri();
 	if ($uri =~ /details\.php/) {
 		return $uri;
+  } elsif ($self->{mech}->content =~ /'details\.php\?id=(\d+)'/) {
+      my $torrentid = $1;
+     $uri = $self->{url}."/details.php?id=".$torrentid;
+     print "Torrent Already exist, but trying to seed on that torrent!\n";
+     return $uri;
 	} else {
 		if ($self->{logging}) {
 			if ($self->{mech}->content =~ /<h3>Mislykket\sopplasting!<\/h3>\n<p>(.*)<\/p>/) {
@@ -109,6 +118,7 @@ sub upload {
 			if ($self->{mech}->content =~ /<h3>(.*)<\/h3>/) {
 				print $1."\n";
 			}
+      #print $self->{mech}->content."\n";
 		}
 		return 0;
 	}
@@ -118,20 +128,26 @@ sub download {
 	my ( $self, $uri, $file_path ) = @_;
 	print "Downloading torrent.\n" if $self->{logging};
 	$self->{mech}->get($uri);
-	my $filename = "undef.torrent";
-	if ($self->{mech}->content =~ /download\.php\/\d+\/(.+)\.torrent"/) {
-		$filename = $1;
+	my $filename = "undef.torrent"; my $torid = 0;
+	if ($self->{mech}->content =~ /download\.php\/(\d+)\/(.+)\.torrent"/) {
+		$filename = $2;
+    $torid = $1;
 	} else {
 		return 0;
 	}
-	$self->{mech}->follow_link( url_regex => qr/download/i );
-	die("Could not download torrent") unless $self->{mech}->success;
-	open(my $TORRENT_FILE, ">", $self->{download_path}."/".$filename.".torrent") or die("Could not write .torrent to path");
-	my $tfile = $self->{mech}->content;
-	$tfile = fastresume::fastresume($tfile, $file_path) if $self->{fastresume};
-	print $TORRENT_FILE $tfile;
-	close($TORRENT_FILE);
-	return $uri;
+	#$self->{mech}->follow_link( url_regex => qr/download/i );
+  my $filesize = 0;
+  while ($filesize == 0) {
+    $self->{mech}->get($self->{url}."/download.php/".$torid."/".$filename.".torrent");
+    die("Could not download torrent") unless $self->{mech}->success;
+    open(my $TORRENT_FILE, ">", $self->{download_path}."/".$filename.".torrent") or die("Could not write .torrent to path");
+    my $tfile = $self->{mech}->content;
+    $tfile = fastresume::fastresume($tfile, $file_path) if $self->{fastresume};
+    print $TORRENT_FILE $tfile;
+    close($TORRENT_FILE);
+    $filesize = -s $self->{download_path}."/".$filename.".torrent";
+  }
+  return $uri;
 }
 
 sub test {
@@ -156,6 +172,47 @@ sub find_type {
 	}
 	return $fallback if $fallback;
 	return 0;
+}
+
+sub find_categories {
+  my $self, $release, $fallback) = @_;
+  my %cats = ();
+  if ($release =~ m/S\d{1,}/i or $release =~ m/(PDTV|HDTV)/i) { #IS TV
+    $cats{'main'} = "2";
+  } elsif($release =~ /(x264|XviD|Blu-Ray|BluRay|DVD|H\.264)/i) {
+    $cats{'main'} = "1";
+  } else {
+    return %cats;
+  }
+  
+  if ($release =~ /XviD/i) {
+    $cats{'sub1'} = "10";
+    $cats{'sub3'} = "29";
+  } elsif ($release =~ /x264/i) {
+    $cats{'sub1'} = "9";
+    $cats{'sub3'} = "29";
+  } elsif ($release =~ /DVD/i) {
+    $cats{'sub1'} = "11";
+    $cats{'sub2'} = "22";
+    $cats{'sub3'} = "26";
+  } elsif ($release =~ /(Bluray|Blu-ray)/i)
+    $cats{'sub1'} = "35";
+    $cats{'sub1'} = "9" if $release =~ /H\.264/i;
+    $cats{'sub3'} = "27";
+  } elsif ($release =~ /H\.264/i) {
+    $cats{'sub1'} = "9";
+    $cats{'sub3'} = "28";
+  }
+  
+  if($release =~ /720p/i) {
+    $cats{'sub2'} = "20";
+  } elsif ($release =~ /1080(p|i)/i) {
+    $cats{'sub2'} = "19";
+  } else {
+    $cats{'sub2'} = "22";
+  }
+  
+  return %cats;
 }
 
 1;
