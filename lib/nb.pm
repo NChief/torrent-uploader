@@ -175,7 +175,7 @@ sub find_type {
 }
 
 sub find_categories {
-  my $self, $release, $fallback) = @_;
+  my ($self, $release, $fallback) = @_;
   my %cats = ();
   if ($release =~ m/S\d{1,}/i or $release =~ m/(PDTV|HDTV)/i) { #IS TV
     $cats{'main'} = "2";
@@ -195,7 +195,7 @@ sub find_categories {
     $cats{'sub1'} = "11";
     $cats{'sub2'} = "22";
     $cats{'sub3'} = "26";
-  } elsif ($release =~ /(Bluray|Blu-ray)/i)
+  } elsif ($release =~ /(Bluray|Blu-ray)/i) {
     $cats{'sub1'} = "35";
     $cats{'sub1'} = "9" if $release =~ /H\.264/i;
     $cats{'sub3'} = "27";
