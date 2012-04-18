@@ -153,7 +153,7 @@ sub init {
 		$glob_vars{'desc'} .= "\n";
 		my $count = 0;
 		foreach(@{$glob_vars{'screens'}}) {
-			$glob_vars{'desc'} .= "\n" if 1 & $count;
+			$glob_vars{'desc'} .= "\n" if ($count % 2 == 0);
 			$glob_vars{'desc'} .= "[URL=".$_->{'screen'}."][img]".$_->{'thumb'}."[/img][/URL]";
 		}
 	}
