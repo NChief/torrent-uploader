@@ -58,7 +58,7 @@ sub filelist {
 	my $file = "";
 	opendir(my $DIR, $path) or die($!);
 	while(my $filename = readdir($DIR)) {
-		next if $filename =~ /(^\.|\.rar$|\.r\d\d$|\.sfv$|ninjabits)/;
+		next if $filename =~ /(^\.|\.rar$|\.[rst]\d\d$|\.sfv$|ninjabits)/;
 		my $syspath = abs_path($path."/".$filename);
 		my $torpath = ($prepath ? $prepath."/" : "").$filename;
 		if (-d $syspath) {
