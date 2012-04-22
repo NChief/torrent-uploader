@@ -100,7 +100,7 @@ sub upload {
 			#anonym => "yes"
 		}
 	);
-	die("Could not reach ".$self->{url}."/takeupload.php") unless ($self->{mech}->success);
+	die("Could not reach ".$self->{url}."/takeuploadbeta.php :: ".$self->{mech}->content) unless ($self->{mech}->success);
 	
 	my $uri = $self->{mech}->uri();
 	if ($uri =~ /details\.php/) {
