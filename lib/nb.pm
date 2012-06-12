@@ -129,7 +129,7 @@ sub download {
 	print "Downloading torrent.\n" if $self->{logging};
 	$self->{mech}->get($uri);
 	my $filename = "undef.torrent"; my $torid = 0;
-	if ($self->{mech}->content =~ /download\.php\/(\d+)\/(.+)\.torrent"/) {
+	if ($self->{mech}->content =~ /download\.php\/(\d+)\/(.+?)\.torrent"/) {
 		$filename = $2;
     $torid = $1;
 	} else {
@@ -140,7 +140,7 @@ sub download {
   while ($filesize == 0) {
     $self->{mech}->get($self->{url}."/download.php/".$torid."/".$filename.".torrent");
     die("Could not download torrent") unless $self->{mech}->success;
-    open(my $TORRENT_FILE, ">", $self->{download_path}."/".$filename.".torrent") or die("Could not write .torrent to path");
+    open(my $TORRENT_FILE, ">", $self->{download_path}."/".$filename.".torrent") or die("Could not write .torrent to path".$self->{download_path}."/".$filename.".torrent - ".$!);
     my $tfile = $self->{mech}->content;
     $tfile = fastresume::fastresume($tfile, $file_path) if $self->{fastresume};
     print $TORRENT_FILE $tfile;
