@@ -71,14 +71,14 @@ sub login {
 }
 
 sub upload {
-	my ( $self, $release_name, $torrent_path, $description, $type, $nfo_path, $scene, %cats) = @_;
+	my ( $self, $release_name, $torrent_path, $description, $nfo_path, $scene, %cats) = @_;
 	if ($scene) { $scene = "yes"; } else { $scene = "no"; }
 	print "Uploading torrent.\n" if $self->{logging};
-	die("input missing") unless ($release_name and $torrent_path and $description and $type);
+	die("input missing") unless ($release_name and $torrent_path and $description);
 	$release_name =~ s/nedlasting\.net//gi;
 	$description =~ s/nedlasting\.net//gi;
-	$self->{mech}->get($self->{url}."/uploadbeta.php");
-	die("Could not reach ".$self->{url}."/uploadbeta.php") unless ($self->{mech}->success);
+	$self->{mech}->get($self->{url}."/upload.php");
+	die("Could not reach ".$self->{url}."/upload.php") unless ($self->{mech}->success);
 	$self->{mech}->add_header('Accept-Charset' => 'iso-8859-1');
 	my $form = $self->{mech}->form_name( "upload" );
 	$form->accept_charset("iso-8859-1");
@@ -92,7 +92,7 @@ sub upload {
 			nfo => $nfo_path,
 			scenerelease => $scene,
 			descr => $description,
-			type => $type,
+			#type => $type,
       main_cat => $cats{'main'},
       sub1_cat => $cats{'sub1'},
       sub2_cat => $cats{'sub2'},
@@ -100,7 +100,7 @@ sub upload {
 			#anonym => "yes"
 		}
 	);
-	die("Could not reach ".$self->{url}."/takeuploadbeta.php :: ".$self->{mech}->content) unless ($self->{mech}->success);
+	die("Could not reach ".$self->{url}."/takeupload.php :: ".$self->{mech}->content) unless ($self->{mech}->success);
 	
 	my $uri = $self->{mech}->uri();
 	if ($uri =~ /details\.php/) {
@@ -154,24 +154,6 @@ sub test {
 	my ( $self, $arg ) = @_;
 	print "wut\n";
 	return $self->{url};
-}
-
-sub find_type {
-	my ( $self, $release, $fallback ) = @_;
-	if ($release =~ m/S\d{1,}/i or $release =~ m/(PDTV|HDTV)/i) { #IS TV
-		if ($release =~ m/XviD/i) { return "1" }
-		if ($release =~ m/x264/i) { return "29" }
-		if ($release =~ m/DVDR/i) {return "27" }
-	} else { #IS MOVIE
-		if ($release =~ m/x264/i) { return "28" }
-		if ($release =~ m/XviD/i) { return "25" }
-		if ($release =~ m/MP4/i) { return "26" }
-		if ($release =~ m/MPEG/i) { return "24" }
-		if ($release =~ m/(BluRay|Blu-Ray)/i) { return "19" }
-		if ($release =~ m/DVD/i) {return "20" }
-	}
-	return $fallback if $fallback;
-	return 0;
 }
 
 sub find_categories {

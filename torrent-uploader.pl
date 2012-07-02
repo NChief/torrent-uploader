@@ -171,8 +171,8 @@ sub init {
 		logging => $logging,
 	} );
 	#find type
-	$type = $nb->find_type($basename, $type_fallback) unless $type;
-	die("Unable to detect type, try -t|--type") unless $type;
+	#$type = $nb->find_type($basename, $type_fallback) unless $type;
+	#die("Unable to detect type, try -t|--type") unless $type;
   
   #Find new cats
   my %cats = $nb->find_categories($basename);
@@ -180,7 +180,7 @@ sub init {
 
 	#Upload
 	#my $upload = "https://norbits.net/details.php?id=68928";
-	my $upload = $nb->upload(toutf8($release), $torrent_file, toutf8($glob_vars{'desc'}), $type, $nfo_file, $scene, %cats);
+	my $upload = $nb->upload(toutf8($release), $torrent_file, toutf8($glob_vars{'desc'}), $nfo_file, $scene, %cats);
 	die("Opplasting mislykktes") unless $upload;
 	
 	# Download
@@ -214,6 +214,7 @@ sub files_do {
 		find (\&files_do, $input);
 	} elsif ($infile !~ /.*\.part\d+\.rar$/ and $infile =~ /.*\.rar$/ and !$no_unrar) {
 		print "Unraring file\n" unless $silent;
+		#print($cfg->param('unrar')." x -inul -y '".$File::Find::name."'");
 		system($cfg->param('unrar')." x -inul -y '".$File::Find::name."'") == 0 or die("Unable to unrar ".$File::Find::name);
 		$glob_vars{'unrar_done'} = 1;
 		find (\&files_do, $input);
