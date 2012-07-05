@@ -1,6 +1,6 @@
 #!/bin/bash
 # build script for torrent-uploader.pl
-# This will install all modules etc for the script to run
+# This will install all modules etc for the script to run.
 
 set -e
 
