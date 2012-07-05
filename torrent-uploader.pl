@@ -27,14 +27,14 @@ use Cwd 'abs_path';
 use File::Basename;
 use DateTime;
 
-my($scene, $type, $make_screens, $nfo_file, $silent, $torrent_file, $work_dir, $torrent_dir, $no_unrar, $no_screens, $type_fallback, $tmp_config, $no_mancreate, $mancreate);
+my($scene, $category, $make_screens, $nfo_file, $silent, $torrent_file, $work_dir, $torrent_dir, $no_unrar, $no_screens, $cat_fallback, $tmp_config, $no_mancreate, $mancreate);
 GetOptions ('c|config-file=s' => \$tmp_config, 
-  'f|type-fallback=s' => \$type_fallback, 
+  'f|cat-fallback=s' => \$cat_fallback, 
   'no-unrar' => \$no_unrar, 
   'torrent-file=s' => \$torrent_file,
   'q|silent' => \$silent,
   's|scene' => \$scene, 
-  't|type=s' => \$type, 
+  't|category=s' => \$category, 
   'work-dir=s' => \$work_dir, 
   'torrent-dir=s' => \$torrent_dir, 
   'no-screens' => \$no_screens, 
@@ -91,6 +91,16 @@ if($torrent_dir and !(-d $torrent_dir)) {
   print STDERR "No torrent dir set.\n";
   usage();
 }
+
+my %cats;
+if($category) {
+  ($cats{'main'}, $cats{'sub1'}, $cats{'sub2'}, $cats{'sub3'}) = split(',',$category, 4);
+}
+my %cats_fallback;
+if($cat_fallback) {
+  ($cats_fallback{'main'}, $cats_fallback{'sub1'}, $cats_fallback{'sub2'}, $cats_fallback{'sub3'}) = split(',',$cat_fallback, 4);
+}
+
 #print $torrent_dir."\n";
 #$torrent_dir = $cfg->param('torrent_dir') unless $torrent_dir;
 
@@ -132,11 +142,13 @@ sub usage {
   "--torrent-file=FILE    Set a torrent file if you already have one, otherwise it will create one.\n".
   "-q|--silent            Silenceing the script(aka no output)\n".
   "-s|--scene             Set if you are uploading a scene release. default is no, but it will assume scene if rar files is presen\n".
-  "--work-dir             To override the work dir set in config.\n".
-  "--torrent-dir          To override the torrent dir set in config.(Where torrents are downloaded).\n".
+  "--work-dir=DIR             To override the work dir set in config.\n".
+  "--torrent-dir=DIR          To override the torrent dir set in config.(Where torrents are downloaded).\n".
   "--no-screens           Disable screen making.\n".
   "--nfo                  Set a nfo file to use as description. default is finding a .nfo in the path.\n".
-  "--no-manual-descr      Set if manual creation of description is not possible, this is set auto when silent.\n";
+  "--no-manual-descr      Set if manual creation of description is not possible, this is set auto when silent.\n".
+  "-t|--category=CATS     Set category, comma seperated list: main,sub1,sub2,sub3 (IDs)\n".
+  "-f|--cat-fallback=CATS Set fallback category if category not found. same format as above.\n";
   exit 0;
 }
 
@@ -153,16 +165,17 @@ sub init {
 		$no_unrar = 1;
 		makescreens($input) if ($make_screens and $input =~ /.*\.(avi|mkv|mp4)$/);
 		if(($nfo_file and -r $nfo_file) and !(-r $work_dir."/nfos/".$release.".nfo")) {
-			print "Stripping nfof." unless $silent;
+			print "Stripping nfo." unless $silent;
 			my $description = description->new( {
 				nfo_file => $nfo_file,
 				manual_create_possible => $mancreate,
 			} );
 			$glob_vars{'desc'} = $description->{'desc'};
 		}
-		$release =~ m/.*(\..*)$/;
-		$extension = $1;
-	    $release =~ s/$extension//;
+		if($release =~ m/.*(\..*)$/) {
+      $extension = $1;
+      $release =~ s/$extension//;
+    }
 	} else { # Not a file, or its not readable!
 		print STDERR $input." is not a file, or its not readable!";
 		return 0;
@@ -203,11 +216,6 @@ sub init {
 		}
 	}
 	
-	# Create torrent
-	#my $create_torrent = 1;
-	#$create_torrent = 0 if $torrent_file;
-	#$create_torrent = 1 if $glob_vars{'unrar_done'};
-	#if ($create_torrent) {
 	if ($glob_vars{'unrar_done'} or (!$torrent_file and !$glob_vars{'unrar_done'})) {
 		print "Creating torrent..\n" unless $silent;
 		my $torrent = torrent->new( {
@@ -246,12 +254,9 @@ sub init {
 		fastresume => 1,
 		logging => $logging,
 	} );
-	#find type
-	#$type = $nb->find_type($basename, $type_fallback) unless $type;
-	#die("Unable to detect type, try -t|--type") unless $type;
   
   #Find new cats
-  my %cats = $nb->find_categories($basename);
+  %cats = $nb->find_categories($basename, %cats_fallback) unless $cats{'main'};
   die("Unable to detect categories") unless $cats{'main'};
 
 	#Upload

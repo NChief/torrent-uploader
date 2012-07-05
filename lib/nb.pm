@@ -106,10 +106,10 @@ sub upload {
 	if ($uri =~ /details\.php/) {
 		return $uri;
   } elsif ($self->{mech}->content =~ /'details\.php\?id=(\d+)'/) {
-      my $torrentid = $1;
-     $uri = $self->{url}."/details.php?id=".$torrentid;
-     print "Torrent Already exist, but trying to seed on that torrent!\n";
-     return $uri;
+    my $torrentid = $1;
+    $uri = $self->{url}."/details.php?id=".$torrentid;
+    print "Torrent Already exist, but trying to seed on that torrent!\n" if $self->{logging};
+    return $uri;
 	} else {
 		if ($self->{logging}) {
 			if ($self->{mech}->content =~ /<h3>Mislykket\sopplasting!<\/h3>\n<p>(.*)<\/p>/) {
@@ -157,14 +157,14 @@ sub test {
 }
 
 sub find_categories {
-  my ($self, $release, $fallback) = @_;
+  my ($self, $release, %fallback) = @_;
   my %cats = ();
   if ($release =~ m/S\d{1,}/i or $release =~ m/(PDTV|HDTV)/i) { #IS TV
     $cats{'main'} = "2";
   } elsif($release =~ /(x264|XviD|Blu-Ray|BluRay|DVD|H\.264)/i) {
     $cats{'main'} = "1";
   } else {
-    return %cats;
+    return %fallback;
   }
   
   if ($release =~ /XviD/i) {
@@ -179,7 +179,7 @@ sub find_categories {
     $cats{'sub3'} = "26";
   } elsif ($release =~ /(Bluray|Blu-ray)/i) {
     $cats{'sub1'} = "35";
-    $cats{'sub1'} = "9" if $release =~ /H\.264/i;
+    $cats{'sub1'} = "9" if $release =~ /(H\.264|AVC)/i;
     $cats{'sub3'} = "27";
   } elsif ($release =~ /H\.264/i) {
     $cats{'sub1'} = "9";

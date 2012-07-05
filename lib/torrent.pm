@@ -32,7 +32,7 @@ sub new {
 	if($self{buildtorrent}) {
 		if ($self{no_unrar}) {
 			system('buildtorrent -q -p1 -l '.$self{piece_length}.' -a '.$self{announce_url}.' "'.$self{file}.'" "'.$self{save_path}.'/'.$filename.'.torrent"') == 0 or die("Creating torrent failed!");
-		 } else {
+		} else {
 			my $filelist = create_filelist($self{save_path}."/".$filename."-filelist.txt", $self{file});
 			system('buildtorrent -q -p1 -l '.$self{piece_length}.' -a '.$self{announce_url}.' -f "'.$filelist.'" -n "'.$filename.'" "'.$self{save_path}.'/'.$filename.'.torrent"') == 0 or die("Creating torrent failed!");
 			

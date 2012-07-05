@@ -52,7 +52,7 @@ sub strip_nfo {
 }
 
 sub manual_create {
-	print "Type in description, end width ^D (CTRL+D):\n";
+	print "No NFO found. Type in description, end width ^D (CTRL+D):\n";
 	my @desc = <STDIN>;
 	my $descr = "";
 	foreach (@desc) { $descr .= $_ }
