@@ -48,7 +48,7 @@ if($tmp_config) {
 } elsif(-r $ENV{"HOME"}."/torrent-uploader.cfg") {
   $config_file = $ENV{"HOME"}."/torrent-uploader.cfg";
 } elsif(-r "./torrent-uploader.cfg") {
-  print STDERR "WARNING: using the config file in the script folder, this might be not what you want!\n";
+  print STDERR "WARNING: using the config file in the script folder, this might be not what you want!\n" unless $silent;
   $config_file = "./torrent-uploader.cfg";
 } else {
   print STDERR "No config file found!";
@@ -58,11 +58,41 @@ if($tmp_config) {
 my $cfg = new Config::Simple();
 $cfg->read($config_file) or die "CONFIG ERROR: ".$cfg->error();
 
-$make_screens = 1 if($cfg->param('make_screens') eq "yes");
-$make_screens = 0 if $no_screens;
-$make_screens = 0 unless $cfg->param('imgur_key');
-$work_dir = $cfg->param('work_dir') unless $work_dir;
-$torrent_dir = $cfg->param('torrent_dir') unless $torrent_dir;
+if($cfg->param('make_screens') eq "yes" and !$no_screens) {
+  unless($cfg->param('imgur_key')) {
+    print STDERR "WARNING: Cannot create screens, missing imgur_key.\n" unless $silent;
+    $make_screens = 0;
+  } else {
+    $make_screens = 1;
+  }
+} else {
+  $make_screens = 0;
+}
+
+if($work_dir and !(-d $work_dir)) {
+  print STDERR "Work dir (".$work_dir.") is not a directory.\n";
+  usage();
+} elsif(-d $cfg->param('work_dir') and !$work_dir) {
+  $work_dir = $cfg->param('work_dir');
+} elsif(!$work_dir) {
+  print STDERR "No workdir set.\n";
+  usage();
+}
+#print $work_dir."\n";
+#$work_dir = $cfg->param('work_dir') unless $work_dir;
+
+if($torrent_dir and !(-d $torrent_dir)) {
+  print STDERR "torrent dir (".$torrent_dir.") is not a directory.\n";
+  usage();
+} elsif(-d $cfg->param('torrent_dir') and !$torrent_dir) {
+  $torrent_dir = $cfg->param('torrent_dir');
+} elsif(!$torrent_dir) {
+  print STDERR "No torrent dir set.\n";
+  usage();
+}
+#print $torrent_dir."\n";
+#$torrent_dir = $cfg->param('torrent_dir') unless $torrent_dir;
+
 my $mancreate = 1;
 $mancreate = 0 if $silent;
 #$no_unrar = 1 if $torrent_file;
