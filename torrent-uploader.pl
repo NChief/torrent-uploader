@@ -28,16 +28,36 @@ use File::Basename;
 use DateTime;
 
 my($scene, $type, $make_screens, $nfo_file, $silent, $torrent_file, $work_dir, $torrent_dir, $no_unrar, $no_screens, $type_fallback, $tmp_config);
-GetOptions ('c|config-file=s' => \$tmp_config, 'f|type-fallback=s' => \$type_fallback, 'no-unrar' => \$no_unrar, 'torrent-file=s' => \$torrent_file,'q|silent' => \$silent,'s|scene' => \$scene, 't|type=s' => \$type, 'work-dir=s' => \$work_dir, 'torrent-dir=s' => \$torrent_dir, 'no-screens' => \$no_screens, 'nfo=s' => \$nfo_file) or die("Wrong input");
+GetOptions ('c|config-file=s' => \$tmp_config, 
+  'f|type-fallback=s' => \$type_fallback, 
+  'no-unrar' => \$no_unrar, 
+  'torrent-file=s' => \$torrent_file,
+  'q|silent' => \$silent,
+  's|scene' => \$scene, 
+  't|type=s' => \$type, 
+  'work-dir=s' => \$work_dir, 
+  'torrent-dir=s' => \$torrent_dir, 
+  'no-screens' => \$no_screens, 
+  'nfo=s' => \$nfo_file) or die("Wrong input");
 
 # Handle config.
-my $config_file = "./torrent-uploader.cfg";
-$config_file = $ENV{"HOME"}."/torrent-uploader.cfg" if (-r $ENV{"HOME"}."/torrent-uploader.cfg");
-$config_file = $tmp_config if ($tmp_config and (-r $tmp_config));
-
+my($config_file);
+if($tmp_config) {
+  print STDERR $tmp_config." is not a file.\n" and usage() unless -r $tmp_config;
+  $config_file = $tmp_config;
+} elsif(-r $ENV{"HOME"}."/torrent-uploader.cfg") {
+  $config_file = $ENV{"HOME"}."/torrent-uploader.cfg";
+} elsif(-r "./torrent-uploader.cfg") {
+  print STDERR "WARNING: using the config file in the script folder, this might be not what you want!\n";
+  $config_file = "./torrent-uploader.cfg";
+} else {
+  print STDERR "No config file found!";
+  usage();
+}
 #print $config_file."\n";
 my $cfg = new Config::Simple();
 $cfg->read($config_file) or die "CONFIG ERROR: ".$cfg->error();
+
 $make_screens = 1 if($cfg->param('make_screens') eq "yes");
 $make_screens = 0 if $no_screens;
 $make_screens = 0 unless $cfg->param('imgur_key');
@@ -50,6 +70,8 @@ $mancreate = 0 if $silent;
 my %glob_vars = ();
 my @checked_files;
 my $input;
+
+usage() unless defined($ARGV[0]) and (-f $ARGV[0] or -d $ARGV[0]);
 
 eval {init(abs_path($ARGV[0])); };
 my $error = $@ if $@;
@@ -65,11 +87,25 @@ if ($error) {
 #print Dumper(\%glob_vars);
 #print $glob_vars{screens}[0];
 
+sub usage {
+  print "USAGE: $0 [OPTIONS] [INPUT FILE/FOLDER]\n".
+  "-c|--config-file=FILE  Set config file, default is ~/torrent-uploader.cfg and fallback to ./torrent-uploader.cfg\n".
+  "--no-unrar             Disables unraring.\n".
+  "--torrent-file=FILE    Set a torrent file if you already have one, otherwise it will create one.\n".
+  "-q|--silent            Silenceing the script(aka no output)\n".
+  "-s|--scene             Set if you are uploading a scene release. default is no, but it will assume scene if rar files is presen\n".
+  "--work-dir             To override the work dir set in config.\n".
+  "--torrent-dir          To override the torrent dir set in config.(Where torrents are downloaded).\n".
+  "--no-screens           Disable screen making.\n".
+  "--nfo                  Set a nfo file to use as description. default is finding a .nfo in the path.\n";
+  exit 0;
+}
+
 sub init {
 	$input = shift;
 	my $basename = basename($input);
 	my $release = $basename;
-	my $extension;
+	my $extension = "";
 	if (-d $input) { #is a directory
 		#$release = $basename;
 		# do needed operation on files!
@@ -155,6 +191,7 @@ sub init {
 		foreach(@{$glob_vars{'screens'}}) {
 			$glob_vars{'desc'} .= "\n" if ($count % 2 == 0);
 			$glob_vars{'desc'} .= "[URL=".$_->{'screen'}."][img]".$_->{'thumb'}."[/img][/URL]";
+      $count++;
 		}
 	}
 	
