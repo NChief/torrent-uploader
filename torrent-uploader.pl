@@ -71,7 +71,7 @@ my %glob_vars = ();
 my @checked_files;
 my $input;
 
-usage() unless defined($ARGV[0]) and (-f $ARGV[0] or -d $ARGV[0]);
+print STDERR "Wrong input!\n" and usage() unless defined($ARGV[0]) and (-f $ARGV[0] or -d $ARGV[0]);
 
 eval {init(abs_path($ARGV[0])); };
 my $error = $@ if $@;
