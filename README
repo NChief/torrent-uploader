@@ -1,9 +1,10 @@
-em I done?
-
-This is going to be a complete rewrite of the nb-upload repo
-Hopefully this will be somewhat better :P
-
-TODO:
-- Several files as class/modules
-- all in one branch. no seprate for rt-relay/usenet crap.
-- do not suck.
+USAGE: torrent-uploader.pl [OPTIONS] [INPUT FILE/FOLDER]
+  -c|--config-file=FILE  Set config file, default is ~/torrent-uploader.cfg and fallback to ./torrent-uploader.cfg
+  --no-unrar             Disables unraring.
+  --torrent-file=FILE    Set a torrent file if you already have one, otherwise it will create one.
+  -q|--silent            Silenceing the script(aka no output).
+  -s|--scene             Set if you are uploading a scene release. default is no, but it will assume scene if rar files is present.
+  --work-dir             To override the work dir set in config.
+  --torrent-dir          To override the torrent dir set in config.(Where torrents are downloaded).
+  --no-screens           Disable screen making.
+  --nfo                  Set a nfo file to use as description. default is finding a .nfo in the path.
