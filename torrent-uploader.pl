@@ -27,7 +27,7 @@ use Cwd 'abs_path';
 use File::Basename;
 use DateTime;
 
-my($scene, $type, $make_screens, $nfo_file, $silent, $torrent_file, $work_dir, $torrent_dir, $no_unrar, $no_screens, $type_fallback, $tmp_config);
+my($scene, $type, $make_screens, $nfo_file, $silent, $torrent_file, $work_dir, $torrent_dir, $no_unrar, $no_screens, $type_fallback, $tmp_config, $no_mancreate, $mancreate);
 GetOptions ('c|config-file=s' => \$tmp_config, 
   'f|type-fallback=s' => \$type_fallback, 
   'no-unrar' => \$no_unrar, 
@@ -38,7 +38,8 @@ GetOptions ('c|config-file=s' => \$tmp_config,
   'work-dir=s' => \$work_dir, 
   'torrent-dir=s' => \$torrent_dir, 
   'no-screens' => \$no_screens, 
-  'nfo=s' => \$nfo_file) or die("Wrong input");
+  'nfo=s' => \$nfo_file,
+  'no-manual-descr' => \$no_mancreate) or die("Wrong input");
 
 # Handle config.
 my($config_file);
@@ -93,9 +94,16 @@ if($torrent_dir and !(-d $torrent_dir)) {
 #print $torrent_dir."\n";
 #$torrent_dir = $cfg->param('torrent_dir') unless $torrent_dir;
 
-my $mancreate = 1;
-$mancreate = 0 if $silent;
-#$no_unrar = 1 if $torrent_file;
+print STDERR "Torrent file(".$torrent_file.") is not a readable file.\n" and usage() if $torrent_file and !(-r $torrent_file);
+print STDERR "NFO file(".$nfo_file.") is not a readable file.\n" and usage() if $nfo_file and !(-r $nfo_file);
+
+if($silent) {
+  $mancreate = 0;
+} elsif($no_mancreate) {
+  $mancreate = 0;
+} else {
+  $mancreate = 1;
+}
 
 my %glob_vars = ();
 my @checked_files;
@@ -127,7 +135,8 @@ sub usage {
   "--work-dir             To override the work dir set in config.\n".
   "--torrent-dir          To override the torrent dir set in config.(Where torrents are downloaded).\n".
   "--no-screens           Disable screen making.\n".
-  "--nfo                  Set a nfo file to use as description. default is finding a .nfo in the path.\n";
+  "--nfo                  Set a nfo file to use as description. default is finding a .nfo in the path.\n".
+  "--no-manual-descr      Set if manual creation of description is not possible, this is set auto when silent.\n";
   exit 0;
 }
 
