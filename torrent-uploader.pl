@@ -39,7 +39,7 @@ GetOptions ('c|config-file=s' => \$tmp_config,
   'torrent-dir=s' => \$torrent_dir, 
   'no-screens' => \$no_screens, 
   'nfo=s' => \$nfo_file,
-  'no-manual-descr' => \$no_mancreate) or die("Wrong input");
+  'no-manual-descr' => \$no_mancreate) or print STDERR "Wrong input\n" and usage();
 
 # Handle config.
 my($config_file);
@@ -141,11 +141,11 @@ sub usage {
   "--no-unrar             Disables unraring.\n".
   "--torrent-file=FILE    Set a torrent file if you already have one, otherwise it will create one.\n".
   "-q|--silent            Silenceing the script(aka no output)\n".
-  "-s|--scene             Set if you are uploading a scene release. default is no, but it will assume scene if rar files is presen\n".
+  "-s|--scene             Set if you are uploading a scene release. default is no, but it will assume scene if rar files is present.\n".
   "--work-dir=DIR         To override the work dir set in config.\n".
   "--torrent-dir=DIR      To override the torrent dir set in config.(Where torrents are downloaded).\n".
   "--no-screens           Disable screen making.\n".
-  "--nfo                  Set a nfo file to use as description. default is finding a .nfo in the path.\n".
+  "--nfo=FILE             Set a nfo file to use as description. default is finding a .nfo in the path.\n".
   "--no-manual-descr      Set if manual creation of description is not possible, this is set auto when silent.\n".
   "-t|--category=CATS     Set category, comma seperated list: main,sub1,sub2,sub3 (IDs)\n".
   "-f|--cat-fallback=CATS Set fallback category if category not found. same format as above.\n";
