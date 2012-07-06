@@ -45,6 +45,11 @@ if ! which gcc &> /dev/null; then
         apt-get -y install gcc
 fi
 
+if ! which unrar &> /dev/null; then
+        echo "unrar not found, installing..:"
+        apt-get -y install unrar
+fi
+
 
 buildtorrent="$(buildtorrent -V | grep buildtorrent | cut -d" " -f2 | cut -d~ -f1)"
 if [ "$buildtorrent" != "0.9" ] && [ "$buildtorrent" != "0.8" ]; then
