@@ -10,7 +10,7 @@ fi
 
 if [ "$(whoami)" != 'root' ]; then
         echo "You need to run $0 as a root user."
-        #exit 1;
+        exit 1;
 fi
 
 echo "Checking for needed packages.."
