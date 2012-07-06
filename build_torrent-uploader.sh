@@ -6,11 +6,12 @@ set -e
 
 if ! which apt-get &> /dev/null; then
         echo "This script is only for users of debian or distros with based on debian(like ubuntu)";
+	exit 1
 fi
 
 if [ "$(whoami)" != 'root' ]; then
         echo "You need to run $0 as a root user."
-        exit 1;
+        exit 1
 fi
 
 echo "Checking for needed packages.."
