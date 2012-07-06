@@ -85,7 +85,10 @@ for i in "${modules[@]}"; do
         fi
 done
 
-apt-get -y install libdatetime-perl
+if [ "$(dpkg-query -W -f='${Status}\n' libdatetime-perl)" != "install ok installed" ]; then
+        echo "libdatetime-perl not found, installing.."
+        apt-get -y install libdatetime-perl
+fi
 
 echo "DONE!"
 
