@@ -12,3 +12,5 @@ USAGE: ./torrent-uploader.pl [OPTIONS] [INPUT FILE/FOLDER]
 -t|--category=CATS     Set category, comma seperated list: main,sub1,sub2,sub3 (IDs)
 -f|--cat-fallback=CATS Set fallback category if category not found. same format as above.
 
+see rtorrent.rc-example for auto-uploading torrents you download.
+the example checks custom_NB and custom1 for the value NBUL. so if you are using rutorrent, you can set label to NBUL, and it will autoupload.

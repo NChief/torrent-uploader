@@ -1,0 +1,28 @@
+#
+### NB UPLOAD START ###
+#
+
+# Method for checking if arg0 eq arg1
+method.insert=check.eq,simple,"equal={argument.0=,argument.1=}"
+
+# check.nbdl= Method to check if custom_NB OR custom1 is set to NBUL
+method.insert = check.nbdl, simple, "or={\"check.eq=$d.get_custom=NB,NBUL\",\"check.eq=$d.get_custom1=,NBUL\"}"
+
+# NBUL to SSD (or whatever dir) - custom_TD = --torrent-dir
+schedule = watch_directory_9,10,10,"load.start=~/torrents/upload/*.torrent,d.directory.set=/ssd/NB-Upload/,\"d.set_custom=NB,DONE\""
+schedule = watch_directory_10,1,1,"load.start=~/torrents/do-upload/*.torrent,d.directory.set=/ssd/NB-Upload/,\"d.set_custom=NB,NBUL\",\"d.set_custom=TD,/home/rtorrent/torrents/upload\""
+
+#NBUL to home - custom_TD = --torrent-dir
+schedule = watch_directory_12,10,10,"load.start=~/torrents/upload-h/*.torrent,d.directory.set=/home/rtorrent/NB-Upload/,\"d.set_custom=NB,DONE\",\"d.set_custom=TD,/home/rtorrent/torrents/upload-h\""
+schedule = watch_directory_13,1,1,"load.start=~/torrents/do-upload-h/*.torrent,d.directory.set=/home/rtorrent/NB-Upload/,\"d.set_custom=NB,NBUL\""
+
+# Upload on finnished if check.nbdl= true
+method.set_key = event.download.finished,upload_me,"branch=check.nbdl=,\"execute.nothrow.bg=/home/rtorrent/scripts/torrent-uploader/torrent-uploader.pl,-q,-f,1,--torrent-dir,$d.get_custom=TD,--torrent-file,$d.loaded_file=,$d.base_path=\""
+
+# nbul= Method for use with ^x - For autostarting torrents after upload to work, this torrent must be in main upload dir...
+method.insert = nbul,simple,"execute.nothrow.bg=/home/rtorrent/scripts/torrent-uploader/torrent-uploader.pl,-q,-f,1,--torrent-file,$d.loaded_file=,$d.base_path="
+
+#
+### NB UPLOAD END ###
+#
+
