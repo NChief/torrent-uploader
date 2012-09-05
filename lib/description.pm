@@ -12,6 +12,7 @@ sub new {
 		file_path => '',
 		nfo_file => '',
 		manual_create_possible => 1,
+    forcemanual => 0,
 	);
 	
 	# loop trough and set the properties to self.
@@ -22,7 +23,7 @@ sub new {
 	}
 	
 	#my $self{desc} = "";
-	if ($self{nfo_file}) {
+	if ($self{nfo_file} and !$self{forcemanual}) {
 		$self{desc} = strip_nfo($self{nfo_file});
 	} elsif ($self{file_path}) { # Will try to make som mediainfo parsere here later.
 		$self{desc} = manual_create() if ($self{manual_create_possible});

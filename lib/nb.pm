@@ -63,7 +63,7 @@ sub login {
 	
 	print "Logging in.\n" if $self{logging};
 	$self{mech}->default_header('Referer' => $self{url}."/login.php");
-	$self{mech}->post($self{url}."/takelogin.php", [ "username" => $self{username}, "password" => $self{password} ]);
+	$self{mech}->post($self{url}."/takelogin.php", [ "username" => $self{username}, "password" => $self{password}, "logout" => "no" ]);
 	
 	return 0 unless $self{mech}->success;
 	return 0 if ($self{mech}->uri eq $self{url}."/takelogin.php");
@@ -137,9 +137,13 @@ sub download {
 	}
 	#$self->{mech}->follow_link( url_regex => qr/download/i );
   my $filesize = 0;
+  my $retries = 0;
   while ($filesize == 0) {
+    $retries++;
+    die("Could not download torrent: ".$self->{url}."/download.php/".$torid."/".$filename.".torrent") if $retries > 3;
     $self->{mech}->get($self->{url}."/download.php/".$torid."/".$filename.".torrent");
-    die("Could not download torrent") unless $self->{mech}->success;
+    next unless $self->{mech}->success;
+    #die("Could not download torrent: ".$self->{url}."/download.php/".$torid."/".$filename.".torrent") unless $self->{mech}->success;
     open(my $TORRENT_FILE, ">", $self->{download_path}."/".$filename.".torrent") or die("Could not write .torrent to path".$self->{download_path}."/".$filename.".torrent - ".$!);
     my $tfile = $self->{mech}->content;
     $tfile = fastresume::fastresume($tfile, $file_path) if $self->{fastresume};

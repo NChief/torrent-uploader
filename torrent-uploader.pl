@@ -27,7 +27,7 @@ use Cwd 'abs_path';
 use File::Basename;
 use DateTime;
 
-my($scene, $category, $make_screens, $nfo_file, $silent, $torrent_file, $work_dir, $torrent_dir, $no_unrar, $no_screens, $cat_fallback, $tmp_config, $no_mancreate, $mancreate);
+my($scene, $category, $make_screens, $nfo_file, $silent, $torrent_file, $work_dir, $torrent_dir, $no_unrar, $no_screens, $cat_fallback, $tmp_config, $no_mancreate, $mancreate, $manual_descr);
 GetOptions ('c|config-file=s' => \$tmp_config, 
   'f|cat-fallback=s' => \$cat_fallback, 
   'no-unrar' => \$no_unrar, 
@@ -39,8 +39,10 @@ GetOptions ('c|config-file=s' => \$tmp_config,
   'torrent-dir=s' => \$torrent_dir, 
   'no-screens' => \$no_screens, 
   'nfo=s' => \$nfo_file,
-  'no-manual-descr' => \$no_mancreate) or print STDERR "Wrong input\n" and usage();
+  'no-manual-descr' => \$no_mancreate,
+  'force-manual-descr' => \$manual_descr) or print STDERR "Wrong input\n" and usage();
 
+#print $manual_descr."\n";
 # Handle config.
 my($config_file);
 if($tmp_config) {
@@ -164,7 +166,7 @@ sub init {
 	} elsif (-r $input) { # is a readable file
 		$no_unrar = 1;
 		makescreens($input) if ($make_screens and $input =~ /.*\.(avi|mkv|mp4)$/);
-		if(($nfo_file and -r $nfo_file) and !(-r $work_dir."/nfos/".$release.".nfo")) {
+		if(($nfo_file and -r $nfo_file) and !(-r $work_dir."/nfos/".$release.".nfo") and !$manual_descr) {
 			print "Stripping nfo." unless $silent;
 			my $description = description->new( {
 				nfo_file => $nfo_file,
@@ -196,7 +198,7 @@ sub init {
 		}
 	}
 	unless ($glob_vars{'desc'}) {
-		my $description = description->new({nfo_file => $nfo_file, manual_create_possible => $mancreate});
+		my $description = description->new({nfo_file => $nfo_file, manual_create_possible => $mancreate, forcemanual => $manual_descr});
 		$glob_vars{'desc'} = $description->{'desc'};
 	}
 
@@ -279,7 +281,7 @@ sub files_do {
 	if($make_screens and $infile =~ /.*\.(avi|mkv|mp4|wmv)$/) { # Make screens
 		makescreens($File::Find::name);
 	}
-	if(!$nfo_file and $infile =~ /.*\.nfo/) {
+	if(!$nfo_file and $infile =~ /.*\.nfo/ and !$manual_descr) {
 		print "Stripping nfos.\n" unless $silent;
 		my $description = description->new( {
 			nfo_file => $File::Find::name,
