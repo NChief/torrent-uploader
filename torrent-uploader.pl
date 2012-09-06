@@ -62,9 +62,24 @@ my $cfg = new Config::Simple();
 $cfg->read($config_file) or die "CONFIG ERROR: ".$cfg->error();
 
 if($cfg->param('make_screens') eq "yes" and !$no_screens) {
-  unless($cfg->param('imgur_key')) {
-    print STDERR "WARNING: Cannot create screens, missing imgur_key.\n" unless $silent;
+  if(defined $cfg->param('imagehost') and $cfg->param('imagehost') eq 'imgur' and !$cfg->param('imgur_key')) {
+    print STDERR "WARNING: Cannot create screens, missing imgur key.\n" unless $silent;
     $make_screens = 0;
+  } elsif(defined $cfg->param('imagehost') and $cfg->param('imagehost') eq 'imageshack' and !$cfg->param('ihack_keys')) {
+    print STDERR "WARNING: Cannot create screens, missing imageshack key.\n" unless $silent;
+    $make_screens = 0;
+  } elsif(defined $cfg->param('imagehost') and $cfg->param('imagehost') eq 'imagebam' and !($cfg->param('ib_api_key') and $cfg->param('ib_api_secret') and $cfg->param('ib_o_token') and $cfg->param('ib_o_token_secret'))) {
+    print STDERR "WARNING: Cannot create screens, missing imagebam key(s).\n" unless $silent;
+    $make_screens = 0;
+  } elsif(not defined $cfg->param('imagehost') and $cfg->param('imgur_key')) {
+    print STDERR "Imagehost not set, but imgur key set, using imgur.\n" unless $silent;
+    $cfg->param('imagehost', 'imgur');
+    #print $cfg->param('imagehost')."\n";
+    #$cfg->save();
+    $make_screens = 1;
+  } elsif(!$cfg->param('imagehost')) {
+    $make_screens = 0;
+    print STDERR "Image host not set, cannot make screens!\n" unless $silent;
   } else {
     $make_screens = 1;
   }
@@ -150,7 +165,8 @@ sub usage {
   "--nfo=FILE             Set a nfo file to use as description. default is finding a .nfo in the path.\n".
   "--no-manual-descr      Set if manual creation of description is not possible, this is set auto when silent.\n".
   "-t|--category=CATS     Set category, comma seperated list: main,sub1,sub2,sub3 (IDs)\n".
-  "-f|--cat-fallback=CATS Set fallback category if category not found. same format as above.\n";
+  "-f|--cat-fallback=CATS Set fallback category if category not found. same format as above.\n".
+  "--force-manual-descr   Do manual descr even if nfo is found, do not work with silent!\n";
   exit 0;
 }
 
@@ -309,11 +325,19 @@ sub makescreens {
 	my $mediafile = shift;
 	return if $mediafile =~ /sample/;
 	print "Making screens..\n" unless $silent;
+  my @ihack_keys = $cfg->param('ihack_keys');
 	for(my $i = 1; $i <= 2; $i++) {
 		my $s = 60 * $i;
 		my $screen = makescreens->new( {
 			mediafile => $mediafile,
 			imgur_key => $cfg->param('imgur_key'),
+      ihack_keys => @ihack_keys,
+      ib_keys => {
+        api_key => $cfg->param('ib_api_key'),
+        api_secret => $cfg->param('ib_api_secret'),
+        o_token => $cfg->param('ib_o_token'),
+        o_token_secret => $cfg->param('ib_o_token_secret'),
+      },
 			ss => $s,
 			dir => $work_dir."/",
 		} );
