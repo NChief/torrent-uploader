@@ -338,7 +338,7 @@ sub makescreens {
         o_token => $cfg->param('ib_o_token'),
         o_token_secret => $cfg->param('ib_o_token_secret'),
       },
-      imghost = $cfg->param('imagehost'),
+      imghost => $cfg->param('imagehost'),
 			ss => $s,
 			dir => $work_dir."/",
 		} );
