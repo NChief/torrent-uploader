@@ -33,7 +33,7 @@ sub new {
 	die("Could not create description.") if (!$self{desc} and $self{manual_create_possible});
 	
 	# Fallback
-	$self{desc} = "NFO managler......." unless $self{desc};
+	$self{desc} = "NFO mangler.." unless $self{desc};
 	return bless \%self, $class;
 }
 
